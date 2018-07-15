@@ -87,7 +87,7 @@ public class HBaseReader extends Reader {
 		for (int i = 0, len = columns.length; i < len; i++) {
 			if (i != rowkeyIndex) {
 				String[] column = columns[i].split(":");
-				scan.addColumn(Bytes.toBytes(column[0]), Bytes.toBytes(column[1]));
+				scan.addColumn(Bytes.toBytes(column[0]), column.length == 2 ? Bytes.toBytes(column[1]) : null);
 			}
 		}
 
@@ -100,7 +100,7 @@ public class HBaseReader extends Reader {
 						record.add(Bytes.toString(result.getRow()));
 					} else {
 						String[] column = columns[i].split(":");
-						record.add(Bytes.toString(result.getValue(Bytes.toBytes(column[0]), Bytes.toBytes(column[1]))));
+						record.add(Bytes.toString(result.getValue(Bytes.toBytes(column[0]), column.length == 2 ? Bytes.toBytes(column[1]) : null)));
 					}
 				}
 				recordCollector.send(record);
