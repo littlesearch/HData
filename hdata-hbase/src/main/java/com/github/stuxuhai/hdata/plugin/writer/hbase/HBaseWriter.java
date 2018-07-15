@@ -77,7 +77,7 @@ public class HBaseWriter extends Writer {
 		for (int i = 0, len = record.size(); i < len; i++) {
 			if (i != rowkeyIndex) {
 				String[] tokens = columns[i].split(":");
-				put.addColumn(Bytes.toBytes(tokens[0]), Bytes.toBytes(tokens[1]),
+				put.addColumn(Bytes.toBytes(tokens[0]), tokens.length == 2 ? Bytes.toBytes(tokens[1]) : null,
 						record.get(i) == null ? null : Bytes.toBytes(record.get(i).toString()));
 			}
 		}
