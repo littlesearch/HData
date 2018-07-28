@@ -42,7 +42,7 @@ public class HBaseReader extends Reader {
 
 		Preconditions.checkNotNull(readerConfig.getString(HBaseReaderProperties.SCHEMA),
 				"HBase reader required property: schema");
-		String[] schema = readerConfig.getString(HBaseReaderProperties.SCHEMA).split(",");
+		String[] schema = readerConfig.getString(HBaseReaderProperties.SCHEMA).split(",");//获取输出的字段信息
 		for (String field : schema) {
 			fields.add(field);
 		}
@@ -58,7 +58,7 @@ public class HBaseReader extends Reader {
 
 		Preconditions.checkNotNull(readerConfig.getString(HBaseReaderProperties.COLUMNS),
 				"HBase reader required property: columns");
-		columns = readerConfig.getString(HBaseReaderProperties.COLUMNS).split("\\s*,\\s*");
+		columns = readerConfig.getString(HBaseReaderProperties.COLUMNS).split("\\s*,\\s*");//:rowkey,cf:start_ip,cf:end_ip
 		for (int i = 0, len = columns.length; i < len; i++) {
 			if (ROWKEY.equalsIgnoreCase(columns[i])) {
 				rowkeyIndex = i;
@@ -84,6 +84,7 @@ public class HBaseReader extends Reader {
 			scan.setStopRow(endRowkey);
 		}
 
+		//添加列族信息 和  列族下面具体列的信息
 		for (int i = 0, len = columns.length; i < len; i++) {
 			if (i != rowkeyIndex) {
 				String[] column = columns[i].split(":");
@@ -95,11 +96,12 @@ public class HBaseReader extends Reader {
 			ResultScanner results = table.getScanner(scan);
 			for (Result result : results) {
 				Record record = new DefaultRecord(fields.size());
-				for (int i = 0, len = fields.size(); i < len; i++) {
+				for (int i = 0, len = fields.size(); i < len; i++) {//输出列的信息
 					if (i == rowkeyIndex) {
-						record.add(Bytes.toString(result.getRow()));
+						record.add(Bytes.toString(result.getRow()));//获取行号
 					} else {
 						String[] column = columns[i].split(":");
+						//根据列族  和  具体列信息获取值
 						record.add(Bytes.toString(result.getValue(Bytes.toBytes(column[0]), column.length == 2 ? Bytes.toBytes(column[1]) : null)));
 					}
 				}

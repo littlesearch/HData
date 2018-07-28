@@ -47,7 +47,7 @@ public class HBaseWriter extends Writer {
 
 		Preconditions.checkNotNull(writerConfig.getString(HBaseWriterProperties.COLUMNS),
 				"HBase writer required property: zookeeper.columns");
-		columns = writerConfig.getString(HBaseWriterProperties.COLUMNS).split(",");
+		columns = writerConfig.getString(HBaseWriterProperties.COLUMNS).split(",");//列名，如：:rowkey,cf:start_ip
 		for (int i = 0, len = columns.length; i < len; i++) {
 			if (ROWKEY.equalsIgnoreCase(columns[i])) {
 				rowkeyIndex = i;
@@ -72,16 +72,17 @@ public class HBaseWriter extends Writer {
 
 	@Override
 	public void execute(Record record) {
-		Object rowkeyValue = record.get(rowkeyIndex);
+		Object rowkeyValue = record.get(rowkeyIndex);//获取rowkey
 		Put put = new Put(Bytes.toBytes(rowkeyValue == null ? "NULL" : rowkeyValue.toString()));
 		for (int i = 0, len = record.size(); i < len; i++) {
-			if (i != rowkeyIndex) {
+			if (i != rowkeyIndex) {//进行数据的添加
 				String[] tokens = columns[i].split(":");
 				put.addColumn(Bytes.toBytes(tokens[0]), tokens.length == 2 ? Bytes.toBytes(tokens[1]) : null,
 						record.get(i) == null ? null : Bytes.toBytes(record.get(i).toString()));
 			}
 		}
 
+		//批量插入
 		putList.add(put);
 		if (putList.size() == batchSize) {
 			try {
